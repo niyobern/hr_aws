@@ -57,3 +57,11 @@ class Radiant(Base):
     duration = Column(String, nullable=False)
     amount = Column(Float, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+class Timetable(Base):
+    __tablename__ = "timetable"
+    id = Column(Integer, primary_key=True, unique=True)
+    user = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable = False)
+    duration = Column(String, nullable=False)
+    amount = Column(Float, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
