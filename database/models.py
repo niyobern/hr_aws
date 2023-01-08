@@ -53,7 +53,7 @@ class Payroll(Base):
 class Radiant(Base):
     __tablename__ = "radiant"
     id = Column(Integer, primary_key=True, unique=True)
-    user = Column(Integer, ForeignKey("employyes.id", ondelete="CASCADE"), nullable = False)
+    user = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable = False)
     duration = Column(String, nullable=False)
     amount = Column(Float, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
