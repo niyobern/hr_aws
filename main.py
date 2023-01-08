@@ -13,9 +13,9 @@ from alembic.config import Config
 app = FastAPI()
 alembic_cfg = Config("alembic.ini")
 
-# models.Base.metadata.create_all(bind=engine)
-revision(alembic_cfg, autogenerate=True)
-upgrade(alembic_cfg,"head")
+models.Base.metadata.create_all(bind=engine)
+# revision(alembic_cfg, autogenerate=True)
+# upgrade(alembic_cfg,"head")
 
 @app.get('/')
 def index():
