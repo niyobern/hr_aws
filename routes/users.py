@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
+from fastapi import FastAPI, status, HTTPException, Depends, APIRouter
+from starlette.responses import JSONResponse
 from sqlalchemy.orm import Session
 from database import models
 from utils import schemas, utils, oauth2
@@ -16,12 +17,12 @@ router = APIRouter(
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_user(user: schemas.User, db: Session = Depends(get_db)):
+def create_user(employee: schemas.Employee, db: Session = Depends(get_db)):
 
-    hashed_password = utils.hash(user.password)
-    user.password = hashed_password
+    hashed_password = utils.hash(employee.password)
+    employee.password = hashed_password
     role = "no_role"
-    user_dict = user.dict()
+    user_dict = employee.dict()
     user_dict["role"] = role
     new_user = models.User(**user_dict)
     db.add(new_user)
@@ -30,13 +31,32 @@ def create_user(user: schemas.User, db: Session = Depends(get_db)):
 
     return new_user
     
-@router.get('/')
+@router.get('/', response_model=schemas.EmailStr)
 def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
-    if current_user.role.value not in ("boss", "deputy_boss"):
+    if current_user.role != "hr":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    users = db.query(models.User).all()
-    users_info = []
-    for user in users:
-        info = {"Name": user.name, "email": user.email, "phone": user.phone, "role": user.role.value, "id": user.id}
-        users_info.append(info)
-    return users_info
+    employees = db.query(models.Employee).filter(models.Employee.deleted == False).all()
+    return employees
+
+@router.patch('/')
+def modify_user(employee: schemas.Employee, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
+    if current_user.role != "hr":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    query = db.query(models.Employee.id == employee.id)
+    query_result = query.first()
+    if query_result == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    query.update(employee, synchronize_session=False)
+    db.commit()
+    return JSONResponse(status_code=200, content={"message": "Finished"})
+
+@router.delete('/{id}')
+def delete_user(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
+    if current_user.role != "hr":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    query = db.query(models.Employee).filter(models.Employee == id)
+    query_result = query.first()
+    if query_result == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    query.delete(synchronize_session=False)
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Finished"})

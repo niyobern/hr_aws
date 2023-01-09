@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from utils.oauth2 import get_current_user
 from database.database import get_db
 from utils import schemas
 from database import models
+from typing import List
 
 router = APIRouter(prefix="/payroll", tags=["Payroll"])
 
-@router.get('/{id}')
-async def get_payroll(id : int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+async def get_payroll(id : int, db):
     base_salary = db.query(models.Employee).filter(models.Employee.id == id).first().salary
     #getting the gross salary and accomodation => hint: accomodation = transport allowances
     accomodation = base_salary / 7
@@ -57,3 +57,12 @@ async def get_payroll(id : int, db: Session = Depends(get_db), current_user: sch
 
     return payroll
 
+@router.get('/')
+async def get_payrolls(ids: List[int], , db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != "hr":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    payroll_list = []
+    for id in ids:
+        payroll = await get_payroll(id=id, db=db)
+        payroll_list.append(payroll)
+    return payroll_list
