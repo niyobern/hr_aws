@@ -11,11 +11,11 @@ from alembic.command import revision, upgrade
 from alembic.config import Config
 
 app = FastAPI()
-alembic_cfg = Config("alembic.ini")
+# alembic_cfg = Config("alembic.ini")
 
-# models.Base.metadata.create_all(bind=engine)
-revision(config=alembic_cfg, autogenerate=True)
-upgrade(config=alembic_cfg, revision="head")
+models.Base.metadata.create_all(bind=engine)
+# revision(config=alembic_cfg, autogenerate=True)
+# upgrade(config=alembic_cfg, revision="head")
 
 @app.get('/')
 def index():

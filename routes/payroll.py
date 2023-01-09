@@ -35,7 +35,7 @@ async def get_payroll(id : int, db: Session = Depends(get_db), current_user: sch
     total_maternity = maternity * 2
     radiant = db.query(models.Radiant).filter(models.Radiant.user == id).first().amount
     net_salary = gross_salary - tpr - rssb3 - maternity - radiant
-    cbhi = 4000
+    cbhi = 0.3 * gross_salary
     net_to_pay = net_salary - cbhi
     payroll = {"Base Salary": base_salary, 
       "Accomodation": accomodation, 
