@@ -55,7 +55,7 @@ class Leave(Base):
     __tablename__ = "leaves"
     id = Column(Integer, primary_key=True, nullable=False, unique=True)
     employee = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
-    department = Column(String, "employees.id", ondelete="CASCADE"), nullable=False)
+    department = Column(String, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
     type = Column(String, nullable=False)
     start = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     end = Column(TIMESTAMP(timezone=True), nullable=False)
