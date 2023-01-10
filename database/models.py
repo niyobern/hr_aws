@@ -93,7 +93,7 @@ class Announcement(Base):
 class Document(Base):
     __tablename__ = "documents"
     id = Column(Integer, primary_key=True, unique=True)
-    employee = Column(Integer, ForeignKey("employee.id", ondelete="CASCADE"), nullable=False)
+    employee = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
     document = Column(String, nullable=False)
     issued = Column(Boolean)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
