@@ -9,6 +9,7 @@ from .database import Base
 class Employee(Base):
     __tablename__ = "employees"
     id = Column(Integer, nullable=False, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE", nullable=False))
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     phone = Column(String, nullable=False, unique=True)
@@ -25,6 +26,8 @@ class Employee(Base):
     mother = Column(String, nullable=False)
     salary = Column(Float)
     position = Column(String)
+    department = Column(String)
+    head = Column(Boolean)
     deleted = Column(Boolean)
     type = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
@@ -32,7 +35,7 @@ class Employee(Base):
 class Bonus(Base):
     __tablename__ = "bonuses"
     id = Column(Integer, nullable=False, primary_key=True)
-    user = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
+    employee = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
     amount = Column(Float, nullable=False)
     start = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     end = Column(TIMESTAMP(timezone=True), nullable=False)
@@ -42,24 +45,31 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, nullable=False)
     email: Column(String, nullable=False, unique=True)
+    phone: Column(String, nullable=False, unique=True)
     password: Column(String, nullable=False)
     active: Column(Boolean)
     role: Column(String)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 class Leave(Base):
     __tablename__ = "leaves"
     id = Column(Integer, primary_key=True, nullable=False)
-    user = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
+    employee = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
+    department = Column(String, ForeignKey("employees.department"), nullable=False)
     type = Column(String, nullable=False)
     start = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     end = Column(TIMESTAMP(timezone=True), nullable=False)
+    accepted = Column(Boolean)
+    allowed = Column(Boolean)
+    feedback = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    
 
 class Payroll(Base):
     __tablename__ = "payrolls"
     id = Column(Integer, primary_key=True, nullable=False)
     period = Column(String, nullable=False)
-    user = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
+    employee = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
     amount_due = Column(Float, nullable=False)
     amount_paid = Column(Float, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
@@ -67,15 +77,23 @@ class Payroll(Base):
 class Radiant(Base):
     __tablename__ = "radiant"
     id = Column(Integer, primary_key=True, unique=True)
-    user = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable = False)
+    employee = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable = False)
     duration = Column(String, nullable=False)
     amount = Column(Float, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
-class Timetable(Base):
-    __tablename__ = "timetable"
+class Announcement(Base):
+    __tablename__ = "announcements"
     id = Column(Integer, primary_key=True, unique=True)
-    user = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable = False)
-    duration = Column(String, nullable=False)
-    amount = Column(Float, nullable=False)
+    table = Column(String, nullable=False)
+    id_in_table = Column(Integer, nullable=False)
+    seen = Column(Boolean)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+class Document(Base):
+    __tablename__ = "documents"
+    id = Column(Integer, primary_key=True, unique=True)
+    employee = Column(Integer, ForeignKey("employee.id", ondelete="CASCADE"), nullable=False)
+    document = Column(String, nullable=False)
+    issued = Column(Boolean)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))

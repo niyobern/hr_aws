@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Response
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from utils import schemas
 from sqlalchemy import or_
-
+from starlette.responses import JSONResponse
+from utils import schemas, utils, oauth2
+from database.database import get_db
 from database import database, models
-from utils import  utils, oauth2, schemas
 
 router = APIRouter(tags=['Authentication'])
 
@@ -31,3 +31,32 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
         return {"access_token": access_token, "token_type": "Bearer"}
 
     return f"Bearer {access_token}"
+
+
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+def create_user(user: schemas.UserIn, db: Session = Depends(get_db)):
+
+    hashed_password = utils.hash(user.password)
+    user.password = hashed_password
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Created"})
+
+@router.post("/hr", status_code=status.HTTP_201_CREATED)
+def create_user(user: schemas.UserIn, db: Session = Depends(get_db)):
+
+    hashed_password = utils.hash(user.password)
+    user.password = hashed_password
+    role = "hr"
+    user_dict = user.dict()
+    user_dict["role"] = role
+    user_dict["active"] = True
+    new_user = models.User(**user_dict)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Created"})

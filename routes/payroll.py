@@ -58,7 +58,7 @@ async def get_payroll(id : int, db):
     return payroll
 
 @router.get('/')
-async def get_payrolls(ids: List[int], , db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+async def get_payrolls(ids: List[int], db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     if current_user.role != "hr":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     payroll_list = []

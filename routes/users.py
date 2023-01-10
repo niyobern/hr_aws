@@ -12,26 +12,20 @@ router = APIRouter(
 )
 
 
-# /users/
-# /users
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_user(employee: schemas.Employee, db: Session = Depends(get_db)):
-
-    hashed_password = utils.hash(employee.password)
-    employee.password = hashed_password
-    role = "no_role"
-    user_dict = employee.dict()
-    user_dict["role"] = role
-    new_user = models.User(**user_dict)
+def create_user(employee: schemas.Employee, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
+    new_user = models.Employee(**employee.dict())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    announcement = models.Announcement(table="employees", id_in_db=new_user.id)
+    db.add(announcement)
+    db.commit()
+    db.refresh(announcement)
 
-    return new_user
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Created"})
     
-@router.get('/', response_model=schemas.EmailStr)
+@router.get('/', response_model=schemas.Employee)
 def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     if current_user.role != "hr":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
@@ -39,15 +33,19 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
     return employees
 
 @router.patch('/')
-def modify_user(employee: schemas.Employee, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
+def modify_user(employee: schemas.EmployeeUpdate, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     if current_user.role != "hr":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     query = db.query(models.Employee.id == employee.id)
     query_result = query.first()
     if query_result == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    if employee.head:
+        role = "head" + employee.department
     query.update(employee, synchronize_session=False)
     db.commit()
+    user_query = db.query(models.User).filter(models.User.id == employee.user_id)
+    user_query.update({"role": role}, synchronize_session=False)
     return JSONResponse(status_code=200, content={"message": "Finished"})
 
 @router.delete('/{id}')
