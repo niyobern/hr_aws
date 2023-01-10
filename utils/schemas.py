@@ -59,7 +59,7 @@ class User(BaseModel):
     active: Optional[bool]
 
 class UserIn(BaseModel):
-    email: str
+    email: EmailStr
     phone: str
     password: str
 
