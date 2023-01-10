@@ -17,7 +17,7 @@ def get_announcements(db: Session = Depends(get_db), current_user: schemas.User 
     if current_user.role == "hr":
         announcements = db.query(models.Announcement).filter(models.Announcement.seen != True).all()
         output = []
-        for i in output:
+        for i in announcements:
             if i.table == "employees":
                 action = "New Employee"
                 employee = db.query(models.Employee).filter(models.Employee.id == i.id_in_table).first()

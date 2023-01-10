@@ -5,7 +5,7 @@ from database import models
 from utils import schemas, utils, oauth2
 from database.database import get_db
 from typing import List
-
+from sqlalchemy import and_
 router = APIRouter(
     prefix="/users",
     tags=['Users']
@@ -31,6 +31,22 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     employees = db.query(models.Employee).filter(models.Employee.deleted == False).all()
     return employees
+
+@router.get('/new', response_model=List[schemas.Employee])
+def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
+    if current_user.role == "hr":
+        announcements = db.query(models.Announcement).filter(and_(models.Announcement.seen != True), models.Announcement.table == "employees").all()
+        employees = []
+        for i in announcements:
+            employee = db.query(models.Employee).filter(models.Employee.id == i.id_in_table).fist()
+            employees.append(employee)
+        return employees
+    else: 
+        employee = db.query(models.Employee).filter(models.Employee.user_id == current_user.id).first()
+        announcement = db.query(models.Announcement).filter(and_(models.Announcement.table == "employees"), models.Announcement.seen != True).filter(models.Announcement.id_in_table == employee.id).first()
+        if announcement != None:
+            return employee
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": []})
 
 @router.get('/{id}', response_model=schemas.Employee)
 def return_profile(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
