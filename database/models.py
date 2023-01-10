@@ -9,7 +9,7 @@ from .database import Base
 class Employee(Base):
     __tablename__ = "employees"
     id = Column(Integer, nullable=False, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE", nullable=False))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     phone = Column(String, nullable=False, unique=True)
