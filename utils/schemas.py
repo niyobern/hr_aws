@@ -76,4 +76,11 @@ class LeaveUpdate(BaseModel):
 class Document(BaseModel):
     document: str
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[str]
+
 
