@@ -13,6 +13,7 @@ class Employee(Base):
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     phone = Column(String, nullable=False, unique=True)
+    gender = Column(String, nullable=False)
     qualification = Column(String, nullable=False)
     birth_district = Column(String, nullable=False)
     birth_sector = Column(String, nullable=False)
@@ -29,6 +30,8 @@ class Employee(Base):
     department = Column(String)
     head = Column(Boolean)
     deleted = Column(Boolean)
+    start = Column(TIMESTAMP(timezone=True))
+    end = Column(TIMESTAMP(timezone=True))
     type = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 

@@ -8,6 +8,7 @@ from database import models
 from typing import List
 from sqlalchemy import and_
 from utils.utils import make_document
+from datetime import datetime
 
 router = APIRouter(prefix="/admin", tags=["Administration"])
 
@@ -61,7 +62,7 @@ def ask_document(document: schemas.Document, db: Session = Depends(get_db), curr
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "done"})
 
 
-@router.post('/documents/{id}')
+@router.post('/documents/services/{id}')
 def give_document(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     if current_user.role != "hr":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
@@ -69,9 +70,21 @@ def give_document(db: Session = Depends(get_db), current_user: schemas.User = De
     document = query.first()
     if document == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    employee = document.employee
+    employee_id = document.employee
     document_type = document.document
-    make_document() ## Need to update the code
+    date_time = datetime.utcnow()
+    s = str(date_time)
+    year = s[:4]
+    month = s[5:7]
+    day = s[8:10]
+    employee = db.query(models.Employee).filter(models.Employee.id == employee_id).first()
+    gender = employee.gender
+    if employee.qualification == "doctor":
+        title = "Dr."
+    elif gender == "male":
+        title = "Mr"
+    else: title == "Mrs"
+    make_document(date=day, month=month, year=year, title=title, date_from=employee.start, date_to=employee.end) 
     dict = {"id": id, "employee": employee, "document": document_type, "issued": True}
     query.update(dict)
     db.commit()
