@@ -63,6 +63,7 @@ class Leave(Base):
     start = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     end = Column(TIMESTAMP(timezone=True), nullable=False)
     accepted = Column(Boolean)
+    reason = Column(String, nullable=False)
     allowed = Column(Boolean)
     feedback = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))

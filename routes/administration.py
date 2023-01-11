@@ -62,7 +62,7 @@ def ask_document(document: schemas.Document, db: Session = Depends(get_db), curr
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "done"})
 
 
-@router.post('/documents/services/{id}')
+@router.get('/documents/services/{id}')
 def give_document(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     if current_user.role != "hr":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)

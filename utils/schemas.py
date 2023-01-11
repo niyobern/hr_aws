@@ -4,6 +4,8 @@ from enum import Enum
 from typing import Optional
 
 class Employee(BaseModel):
+    id: Optional[int]
+    user_id: Optional[str]
     name : str
     email : str
     phone : str

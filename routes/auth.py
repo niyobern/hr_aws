@@ -5,10 +5,14 @@ from sqlalchemy import or_
 from starlette.responses import JSONResponse
 from utils import schemas, utils, oauth2
 from database.database import get_db
+from utils.oauth2 import get_current_user
 from database import database, models
 
 router = APIRouter(tags=['Authentication'])
 
+@router.get('/current')
+def get_user_info(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"Id": current_user.id, "Email": current_user.email, "Role": current_user.role})
 
 @router.post('/login')
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
