@@ -20,7 +20,7 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["POST", "GET", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Authorization", "content-type", "Access-Control-Allow-Origin",  "*",],
+    allow_headers=["Authorization", "content-type", "Access-Control-Allow-Origin", "https://main.d21j7tr3qzvr5x.amplifyapp.com", "https://www.hr.lavajavahouse.net", "*",],
 )
 
 
