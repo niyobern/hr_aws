@@ -4,7 +4,7 @@ from utils.oauth2 import get_current_user
 from database.database import get_db
 from utils import schemas
 from database import models
-from typing import List
+from typing import List, Optional
 
 router = APIRouter(prefix="/payroll", tags=["Payroll"])
 
@@ -58,10 +58,13 @@ async def get_payroll(id : int, db):
     return payroll
 
 @router.get('/')
-async def get_payrolls(ids: List[int], db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+async def get_payrolls(ids: Optional[List[int]], db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     if current_user.role != "hr":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     payroll_list = []
+    if ids == None:
+        last_employee = db.query(models.Employee).order_by(models.id.desc()).first()
+        ids = [x for x in range(last_employee)]
     for id in ids:
         payroll = await get_payroll(id=id, db=db)
         payroll_list.append(payroll)
