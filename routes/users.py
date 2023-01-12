@@ -46,7 +46,7 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
         if employee != None :
             return JSONResponse(status_code=status.HTTP_200_OK, content={"message": []})
         user = db.query(models.User).filter(models.User.id == current_user.id).first()
-        return [user]
+        return [{"user_id": user.id, "email": user.email, "phone": user.phone}]
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": []})
 
 @router.get('/{id}')
