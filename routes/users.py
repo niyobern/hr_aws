@@ -18,7 +18,7 @@ def create_user(employee: schemas.Employee, db: Session = Depends(get_db), curre
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    announcement = models.Announcement(table="employees", id_in_db=new_user.id)
+    announcement = models.Announcement(table="employees", id_in_table=new_user.id)
     db.add(announcement)
     db.commit()
     db.refresh(announcement)
@@ -44,7 +44,7 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
     else: 
         employee = db.query(models.Employee).filter(models.Employee.user_id == current_user.id).first()
         if employee != None :
-            return JSONResponse(status_code=status.HTTP_200_OK, content={"message": []})
+            return JSONResponse(status_code=status.HTTP_200_OK, content=[])
         user = db.query(models.User).filter(models.User.id == current_user.id).first()
         return [{"user_id": user.id, "email": user.email, "phone": user.phone}]
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": []})
