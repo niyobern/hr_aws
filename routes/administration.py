@@ -15,7 +15,7 @@ router = APIRouter(prefix="/admin", tags=["Administration"])
 @router.get('/new')
 def get_announcements(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     if current_user.role == "hr":
-        announcements = db.query(models.Announcement).filter(models.Announcement.seen != True).all()
+        announcements = db.query(models.Announcement).filter(models.Announcement.seen == None).all()
         output = []
         for i in announcements:
             if i.table == "employees":
