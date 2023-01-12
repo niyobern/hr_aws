@@ -63,7 +63,7 @@ def modify_user(employee: schemas.EmployeeUpdate, db: Session = Depends(get_db),
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     if employee.head:
         role = "head" + employee.department
-    query.update(employee, synchronize_session=False)
+    query.update(employee.dict(), synchronize_session=False)
     db.commit()
     user_query = db.query(models.User).filter(models.User.id == employee.user_id)
     user_query.update({"role": role}, synchronize_session=False)
