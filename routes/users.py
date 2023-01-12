@@ -24,14 +24,6 @@ def create_user(employee: schemas.Employee, db: Session = Depends(get_db), curre
     db.refresh(announcement)
 
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Created"})
-    
-@router.get('/')
-def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
-    if current_user.role != "hr":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    employees = db.query(models.Employee).filter(models.Employee.deleted == False).all()
-    return employees
-
 @router.get('/new')
 def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     if current_user.role == "hr":
@@ -47,6 +39,13 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
             return JSONResponse(status_code=status.HTTP_200_OK, content=[])
         user = db.query(models.User).filter(models.User.id == current_user.id).first()
         return [{"user_id": user.id, "email": user.email, "phone": user.phone}]
+    
+@router.get('/')
+def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
+    if current_user.role != "hr":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    employees = db.query(models.Employee).filter(models.Employee.deleted == False).all()
+    return employees
 
 @router.get('/{id}')
 def return_profile(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
