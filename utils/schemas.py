@@ -31,6 +31,7 @@ class Employee(BaseModel):
 class EmployeeUpdate(BaseModel):
     user_id : int
     id: int
+    start: str
     salary : str
     position : str
     deleted : Optional[str]
