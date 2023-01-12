@@ -42,7 +42,7 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
             employees.append(employee)
         return employees
     else: 
-        employee = db.query(models.Use).filter(models.Employee.user_id == current_user.id).first()
+        employee = db.query(models.Employee).filter(models.Employee.user_id == current_user.id).first()
         if employee != None :
             return JSONResponse(status_code=status.HTTP_200_OK, content={"message": []})
         user = db.query(models.User).filter(models.User.id == current_user.id).first()
