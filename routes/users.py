@@ -35,7 +35,7 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
 @router.get('/new')
 def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     if current_user.role == "hr":
-        announcements = db.query(models.Announcement).filter(and_(models.Announcement.seen == None), models.Announcement.table == "employees").all()
+        announcements = db.query(models.Announcement).filter(and_(models.Announcement.seen == True), models.Announcement.table == "employees").all()
         employees = []
         for i in announcements:
             employee = db.query(models.Employee).filter(models.Employee.id == i.id_in_table).first()
@@ -67,7 +67,7 @@ def modify_user(employee: schemas.EmployeeUpdate, db: Session = Depends(get_db),
     db.commit()
     user_query = db.query(models.User).filter(models.User.id == employee.user_id)
     user_query.update({"role": role}, synchronize_session=False)
-    announcement = db.query(models.Announcement).filter(models.Announcement.id_in_table == employee.id)
+    announcement = db.query(models.Announcement).filter(models.Announcement.id_in_table == employee.id).filter(models.Announcement.table == "employees")
     announcement.update({"seen": True}) 
     return JSONResponse(status_code=200, content={"message": "Finished"})
 
