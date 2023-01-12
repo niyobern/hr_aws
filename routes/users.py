@@ -35,7 +35,7 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
 @router.get('/new')
 def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     if current_user.role == "hr":
-        announcements = db.query(models.Announcement).filter(and_(models.Announcement.seen != True), models.Announcement.table == "employees").all()
+        announcements = db.query(models.Announcement).all()
         employees = []
         for i in announcements:
             employee = db.query(models.Employee).filter(models.Employee.id == i.id_in_table).first()
