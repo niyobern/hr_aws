@@ -38,7 +38,7 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
         announcements = db.query(models.Announcement).filter(and_(models.Announcement.seen != True), models.Announcement.table == "employees").all()
         employees = []
         for i in announcements:
-            employee = db.query(models.Employee).filter(models.Employee.id == i.id_in_table).fist()
+            employee = db.query(models.Employee).filter(models.Employee.id == i.id_in_table).first()
             employees.append(employee)
         return employees
     else: 
@@ -47,7 +47,6 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
             return JSONResponse(status_code=status.HTTP_200_OK, content=[])
         user = db.query(models.User).filter(models.User.id == current_user.id).first()
         return [{"user_id": user.id, "email": user.email, "phone": user.phone}]
-    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": []})
 
 @router.get('/{id}')
 def return_profile(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
