@@ -67,7 +67,7 @@ def modify_user(employee: schemas.EmployeeUpdate, db: Session = Depends(get_db),
     user_query = db.query(models.User).filter(models.User.id == employee.user_id)
     user_query.update({"role": role}, synchronize_session=False)
     announcement = db.query(models.Announcement).filter(models.Announcement.id_in_table == employee.id).filter(models.Announcement.table == "employees").first()
-    query = db.query(models.Announcement).filter(models.Announcement == announcement.id)
+    query = db.query(models.Announcement).filter(models.Announcement.id == announcement.id)
     print(query.first())
     query.update({"seen": True}, synchronize_session=False) 
     return JSONResponse(status_code=200, content={"message": "Finished"})
