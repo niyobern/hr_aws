@@ -57,7 +57,7 @@ def return_profile(id: int, db: Session = Depends(get_db), current_user: schemas
 def modify_user(employee: schemas.EmployeeUpdate, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     if current_user.role != "hr":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    query = db.query(models.Employee.id == employee.id)
+    query = db.query(models.Employee).filter(models.Employee.id == employee.id)
     query_result = query.first()
     if query_result == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
