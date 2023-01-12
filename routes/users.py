@@ -32,7 +32,7 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
         for i in announcements:
             employee = db.query(models.Employee).filter(models.Employee.id == i.id_in_table).first()
             employees.append(employee)
-        return employees
+        return announcements
     else: 
         employee = db.query(models.Employee).filter(models.Employee.user_id == current_user.id).first()
         if employee != None :
