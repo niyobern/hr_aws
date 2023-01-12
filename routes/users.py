@@ -70,7 +70,7 @@ def modify_user(employee: schemas.EmployeeUpdate, db: Session = Depends(get_db),
     announcement = db.query(models.Announcement).filter(and_(models.Announcement.id_in_table == employee.id, models.Announcement.table == "employees")).first()
     query = db.query(models.Announcement).filter(models.Announcement.id == announcement.id)
     query.update({"seen": True}, synchronize_session=False) 
-    return JSONResponse(status_code=200, content={"message": "Finished"})
+    return JSONResponse(status_code=200, content={"message": query.first()})
 
 @router.delete('/{id}')
 def delete_user(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
