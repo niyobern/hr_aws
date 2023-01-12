@@ -91,7 +91,7 @@ class Announcement(Base):
     id = Column(Integer, primary_key=True, unique=True)
     table = Column(String, nullable=False)
     id_in_table = Column(Integer, nullable=False)
-    seen = Column(Boolean)
+    seen = Column(Boolean, nullable=False, server_default="false")
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 class Document(Base):
