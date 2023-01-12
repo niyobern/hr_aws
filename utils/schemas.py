@@ -6,7 +6,7 @@ from typing import Optional
 class Employee(BaseModel):
     gender: str
     id: Optional[int]
-    user_id: Optional[str]
+    user_id: Optional[int]
     name : str
     email : str
     phone : str
