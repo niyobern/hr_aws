@@ -78,7 +78,7 @@ def verify_user(verification: schemas.Verify, db: Session = Depends(get_db), cur
     if fetch.first().active == True:
         raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
     if fetch.first().verification_code == verification.code:
-        fetch.update({"Verified": True}, synchronize_session=False)
+        fetch.update({"active": True}, synchronize_session=False)
     else: raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return {"message": 'Verified'}
 
