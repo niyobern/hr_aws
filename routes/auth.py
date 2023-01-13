@@ -50,7 +50,6 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def create_user(user: schemas.UserIn, db: Session = Depends(get_db)):
-
     hashed_password = utils.hash(user.password)
     user.password = hashed_password
     list = []
@@ -64,7 +63,7 @@ def create_user(user: schemas.UserIn, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     client.publish(
-    PhoneNumber="+250786082841",
+    PhoneNumber="+25" + user.phone
     Message= f"Your CUR Verification code is {otp} ",
     MessageAttributes={'AWS.SNS.SMS.SenderID': {'DataType': 'String', 'StringValue': 'CUR' }}
 )
