@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile
 from starlette.responses import JSONResponse
 from sqlalchemy.orm import Session
 from utils.oauth2 import get_current_user
@@ -11,6 +11,12 @@ from utils.utils import make_document
 from datetime import datetime
 
 router = APIRouter(prefix="/admin", tags=["Administration"])
+
+@router.get("/file")
+def get_file():
+    filesample = open("mycontact.png", "rb")
+    file = UploadFile(filename="sample.png", file=filesample)
+    return file
 
 @router.get('/new')
 def get_announcements(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
