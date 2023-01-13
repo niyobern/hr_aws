@@ -5,6 +5,7 @@ from utils.oauth2 import get_current_user
 from database.database import get_db
 from utils import schemas
 from database import models
+from fastapi.responses import FileResponse
 from typing import List
 from sqlalchemy import and_
 from utils.utils import make_document
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/admin", tags=["Administration"])
 def get_file():
     with open("mycontact.png", "rb") as filesample:
         file = UploadFile(filename="sample.png", file=filesample, content_type="image/png")
-        return filesample
+        return FileResponse(path="mycontact.png")
 
 @router.get('/new')
 def get_announcements(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
