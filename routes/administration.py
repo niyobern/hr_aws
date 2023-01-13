@@ -16,7 +16,7 @@ router = APIRouter(prefix="/admin", tags=["Administration"])
 def get_file():
     with open("mycontact.png", "rb") as filesample:
         file = UploadFile(filename="sample.png", file=filesample, content_type="image/png")
-        return file
+        return filesample
 
 @router.get('/new')
 def get_announcements(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
