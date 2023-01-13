@@ -10,6 +10,13 @@ from typing import List
 from sqlalchemy import and_
 from utils.utils import make_document
 from datetime import datetime
+import pathlib
+import os
+import boto3
+from database.config import settings
+
+access_key = settings.aws_access_key
+secret_key = settings.aws_secret_key
 
 router = APIRouter(prefix="/admin", tags=["Administration"])
 
@@ -70,7 +77,7 @@ def ask_document(document: schemas.Document, db: Session = Depends(get_db), curr
 
 
 @router.get('/documents/services/{id}')
-def give_document(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+def give_document(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     if current_user.role != "hr":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     query = db.query(models.Document).filter(models.Document.id == id)
@@ -86,13 +93,17 @@ def give_document(db: Session = Depends(get_db), current_user: schemas.User = De
     day = s[8:10]
     employee = db.query(models.Employee).filter(models.Employee.id == employee_id).first()
     gender = employee.gender
+    name = employee.name
     if employee.qualification == "doctor":
         title = "Dr."
     elif gender == "male":
         title = "Mr"
     else: title == "Mrs"
-    make_document(date=day, month=month, year=year, title=title, date_from=employee.start, date_to=employee.end) 
-    dict = {"id": id, "employee": employee, "document": document_type, "issued": True}
+    object_name = str(employee_id) + "_" +  str(id) 
+    a = make_document(date=day, month=month, year=year, title=title, name=name, date_from=employee.start, date_to=employee.end, object_name=object_name) 
+    if a != None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+    dict = {"id": id, "employee": employee_id, "document": document_type, "issued": True}
     query.update(dict)
     db.commit()
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "done"})

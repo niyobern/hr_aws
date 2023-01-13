@@ -11,13 +11,18 @@ import boto3
 from random import random
 import math
 from sqlalchemy.sql.expression import text
+from database.config import settings
+
+access_key = settings.aws_access_key
+secret_key = settings.aws_secret_key
+
 
 router = APIRouter(tags=['Authentication'])
 
 client = boto3.client(
     "sns",
-    aws_access_key_id="AKIAWCJGOJN2DIEYFHFM",
-    aws_secret_access_key="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",
+    aws_access_key_id=access_key,
+    aws_secret_access_key=secret_key,
     region_name="us-east-1"
 )
 
