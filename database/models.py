@@ -50,7 +50,9 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     phone = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    active = Column(Boolean)
+    active = Column(Boolean, nullable=False, server_default="false")
+    verification_code = Column(String)
+    verification_code_time = Column(TIMESTAMP(timezone=True), nullable=False)
     role = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 

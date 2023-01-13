@@ -62,6 +62,9 @@ class User(BaseModel):
     role: Optional[str]
     active: Optional[bool]
 
+class Verify(BaseModel):
+    code: str
+
 class UserIn(BaseModel):
     email: EmailStr
     phone: str
