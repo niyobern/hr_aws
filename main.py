@@ -14,13 +14,13 @@ app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
 # revision(config=alembic_cfg, autogenerate=True)
 # upgrade(config=alembic_cfg, revision="head")
-origins = ["hhtp://localhost:3000"]
+origins = ["hhtp://localhost:3000", "https://main.d21j7tr3qzvr5x.amplifyapp.com", "https://www.hr.lavajavahouse.net", "*",]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["POST", "GET", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Authorization", "content-type", "Access-Control-Allow-Origin", "https://main.d21j7tr3qzvr5x.amplifyapp.com", "https://www.hr.lavajavahouse.net", "*",],
+    allow_headers=["Authorization", "content-type", "Access-Control-Allow-Origin"],
 )
 
 
