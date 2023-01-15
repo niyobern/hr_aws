@@ -8,6 +8,7 @@ from typing import List
 from sqlalchemy import and_
 import boto3
 from database.config import settings
+import segno
 
 access_key = settings.aws_access_key
 secret_key = settings.aws_secret_key
@@ -58,16 +59,22 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
 def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     if current_user.role != "hr":
         employee = db.query(models.Employee).filter(models.Employee.user_id == current_user.id).first()
-        card = {"name": employee.name, "position": employee.position, "department": employee.department, "type": employee.type, "image": f"https://ntaweli-hr.s3.us-east-2.amazonaws.com/{employee.image}"}
+        card = {"name": employee.name, "position": employee.position, "department": employee.department, "type": employee.type, "image": f"https://ntaweli-hr.s3.us-east-2.amazonaws.com/{employee.image}", "qr": f"https://ntaweli-hr.s3.us-east-2.amazonaws.com/qr_{employee.id}.png"}
         return [card]
     employees = db.query(models.Employee).filter(models.Employee.deleted == False).all()
     return employees
+
+@router.get('/card/{id}')
+def return_profile(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
+    employee = db.query(models.Employee).filter(models.Employee.id == id).first()
+    card = {"name": employee.name, "position": employee.position, "department": employee.department, "type": employee.type, "image": f"https://ntaweli-hr.s3.us-east-2.amazonaws.com/{employee.image}", "qr": f"https://ntaweli-hr.s3.us-east-2.amazonaws.com/qr_{employee.id}.png"}
+    return card
 
 @router.get('/{id}')
 def return_profile(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     employee = db.query(models.Employee).filter(models.Employee.id == id).first()
     card = {"name": employee.name, "position": employee.position, "department": employee.department, "type": employee.type, "image": f"https://ntaweli-hr.s3.us-east-2.amazonaws.com/{employee.image}"}
-    return card
+    return employee
 
 @router.patch('/')
 def modify_user(employee: schemas.EmployeeUpdate, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
@@ -80,7 +87,10 @@ def modify_user(employee: schemas.EmployeeUpdate, db: Session = Depends(get_db),
     if employee.head:
         role = "head" + employee.department
     else: role = "none" + employee.department
-    query.update(employee.dict(), synchronize_session=False)
+    qr_code = segno.make(f"https://imsapi.lavajavahouse.net/users/{employee.id}")
+    qr_code.save("qr.png", scale=5)
+    s3.upload_file("qr.png", "ntaweli-hr", f"qr_{employee.id}.png")
+    query.update(**employee, synchronize_session=False)
     db.commit()
     user_query = db.query(models.User).filter(models.User.id == employee.user_id)
     user_query.update({"role": role}, synchronize_session=False)

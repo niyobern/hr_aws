@@ -10,8 +10,6 @@ from typing import List
 from sqlalchemy import and_
 from utils.utils import make_document
 from datetime import datetime
-import pathlib
-import os
 import boto3
 from database.config import settings
 
