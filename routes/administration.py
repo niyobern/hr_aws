@@ -18,13 +18,17 @@ from database.config import settings
 access_key = settings.aws_access_key
 secret_key = settings.aws_secret_key
 
+s3 = boto3.client("s3", 
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key)
+
 router = APIRouter(prefix="/admin", tags=["Administration"])
 
-@router.get("/file")
-def get_file():
-    with open("mycontact.png", "rb") as filesample:
-        file = UploadFile(filename="sample.png", file=filesample, content_type="image/png")
-        return FileResponse(path="mycontact.png")
+@router.get("/file/{link}")
+def get_file(link: str):
+    s3.download_file('ntaweli-hr', link, 'image.png')
+    return FileResponse(path="image.png")
+
 
 @router.get('/new')
 def get_announcements(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
@@ -59,7 +63,13 @@ def get_announcements(db: Session = Depends(get_db), current_user: schemas.User 
 @router.get('/documents')
 def get_requests(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     if current_user.role != "hr":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+        documents = db.query(models.Document).filter(models.Document.employee == current_user.id).all()
+        links = []
+        for d in documents:
+            id = d.id
+            link = f"https://ntaweli-hr.s3.us-east-2.amazonaws.com/document_{id}.docx"
+            links.append(link)
+        return links
     requests = db.query(models.Document).filter(models.Document.issued == None).all()
     return requests
 
@@ -99,11 +109,11 @@ def give_document(id: int, db: Session = Depends(get_db), current_user: schemas.
     elif gender == "male":
         title = "Mr"
     else: title == "Mrs"
-    object_name = str(employee_id) + "_" +  str(id) 
+    object_name = "document" + "_" +  str(id) 
     a = make_document(date=day, month=month, year=year, title=title, name=name, date_from=employee.start, date_to=employee.end, object_name=object_name) 
     if a != None:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
-    dict = {"id": id, "employee": employee_id, "document": document_type, "issued": True}
+    dict = {"id": id, "employee": employee_id, "document": document_type, "issued": True, "link": f"{object_name}.docx"}
     query.update(dict)
     db.commit()
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "done"})

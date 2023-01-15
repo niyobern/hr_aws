@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, HTTPException, Depends, APIRouter
+from fastapi import FastAPI, status, HTTPException, Depends, APIRouter, Form
 from starlette.responses import JSONResponse
 from sqlalchemy.orm import Session
 from database import models
@@ -6,6 +6,16 @@ from utils import schemas, utils, oauth2
 from database.database import get_db
 from typing import List
 from sqlalchemy import and_
+import boto3
+from database.config import settings
+
+access_key = settings.aws_access_key
+secret_key = settings.aws_secret_key
+
+s3 = boto3.client("s3", 
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key)
+
 router = APIRouter(
     prefix="/users",
     tags=['Users']
@@ -14,7 +24,11 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(employee: schemas.Employee, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
-    new_user = models.Employee(**employee.dict())
+    image = employee.image
+    bucket_name = "ntaweli-hr"
+    object_name = f"{current_user.id}_{image.filename}"
+    s3.upload_fileobj(image.file, bucket_name, object_name)
+    new_user = models.Employee(**employee.dict(), image=object_name)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -22,8 +36,8 @@ def create_user(employee: schemas.Employee, db: Session = Depends(get_db), curre
     db.add(announcement)
     db.commit()
     db.refresh(announcement)
-
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Created"})
+    
 @router.get('/new')
 def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     if current_user.role == "hr":
@@ -43,14 +57,17 @@ def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.Us
 @router.get('/')
 def return_get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     if current_user.role != "hr":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+        employee = db.query(models.Employee).filter(models.Employee.user_id == current_user.id).first()
+        card = {"name": employee.name, "position": employee.position, "department": employee.department, "type": employee.type, "image": f"https://ntaweli-hr.s3.us-east-2.amazonaws.com/{employee.image}"}
+        return [card]
     employees = db.query(models.Employee).filter(models.Employee.deleted == False).all()
     return employees
 
 @router.get('/{id}')
 def return_profile(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     employee = db.query(models.Employee).filter(models.Employee.id == id).first()
-    return employee
+    card = {"name": employee.name, "position": employee.position, "department": employee.department, "type": employee.type, "image": f"https://ntaweli-hr.s3.us-east-2.amazonaws.com/{employee.image}"}
+    return card
 
 @router.patch('/')
 def modify_user(employee: schemas.EmployeeUpdate, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):

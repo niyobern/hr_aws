@@ -10,6 +10,7 @@ class Employee(Base):
     __tablename__ = "employees"
     id = Column(Integer, nullable=False, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    image = Column(String)
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     phone = Column(String, nullable=False, unique=True)
@@ -102,4 +103,5 @@ class Document(Base):
     employee = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
     document = Column(String, nullable=False)
     issued = Column(Boolean)
+    link = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))

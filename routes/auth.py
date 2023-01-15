@@ -16,6 +16,9 @@ from database.config import settings
 access_key = settings.aws_access_key
 secret_key = settings.aws_secret_key
 
+s3 = boto3.client("s3", 
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key)
 
 router = APIRouter(tags=['Authentication'])
 
@@ -67,16 +70,12 @@ def create_user(user: schemas.UserIn, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    client.publish(
-    PhoneNumber="+25" + user.phone
-    Message= f"Your CUR Verification code is {otp} ",
-    MessageAttributes={'AWS.SNS.SMS.SenderID': {'DataType': 'String', 'StringValue': 'CUR' }}
-)
+    client.publish(PhoneNumber="+25" + user.phone, Message= f"Your CUR Verification code is {otp} ", MessageAttributes={'AWS.SNS.SMS.SenderID': {'DataType': 'String', 'StringValue': 'CUR' }})
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Created"})
 
 @router.patch("/verify")
-def verify_user(verification: schemas.Verify, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
-    fetch = db.query(models.User).filter(models.User.id == current_user.id)
+def verify_user(verification: schemas.Verify, db: Session = Depends(get_db)):
+    fetch = db.query(models.User).filter(models.User.id == verification.user_id)
     if fetch.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     if fetch.first().active == True:
